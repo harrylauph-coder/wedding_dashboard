@@ -1,599 +1,157 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Henry & Nesley — Bali Wedding Dashboard</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<style>
-  :root {
-    --bg: #ffffff;
-    --sidebar-bg: #f7f6f3;
-    --text: #37352f;
-    --text-light: #6b6b6b;
-    --accent: #2eaadc;
-    --red: #e03e3e;
-    --orange: #d9730d;
-    --green: #0f7b6c;
-    --yellow: #dfab01;
-    --purple: #6940a5;
-    --pink: #ad1a72;
-    --blue: #0b6e99;
-    --tag-red-bg: #fbe4e4;
-    --tag-orange-bg: #faebdd;
-    --tag-green-bg: #dbeddb;
-    --tag-yellow-bg: #fdecc8;
-    --tag-purple-bg: #e8deee;
-    --tag-blue-bg: #ddebf1;
-    --tag-pink-bg: #f4dfeb;
-    --tag-gray-bg: #e3e2e0;
-    --border: #e9e9e7;
-    --hover: #f1f1ef;
-  }
-  * { margin:0; padding:0; box-sizing:border-box; }
-  body { font-family:'Inter',sans-serif; color:var(--text); background:var(--bg); line-height:1.6; }
-  
-  .page { max-width:960px; margin:0 auto; padding:20px 24px 60px; }
-  
-  .page-header { margin-bottom:32px; padding-bottom: 16px; border-bottom: 1px solid var(--border);}
-  .page-icon { font-size:48px; margin-bottom:8px; }
-  .page-title { font-size:32px; font-weight:700; margin-bottom:4px; }
-  .page-subtitle { color:var(--text-light); font-size:14px; }
-  
-  .overview-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(200px,1fr)); gap:12px; margin-bottom:32px; }
-  .overview-card { background:var(--sidebar-bg); border-radius:8px; padding:16px; }
-  .overview-card .label { font-size:12px; color:var(--text-light); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px;}
-  .overview-card .value { font-size:18px; font-weight:600; }
-  
-  .section { margin-bottom:36px; }
-  .section-header { display:flex; align-items:center; gap:8px; margin-bottom:12px; cursor:pointer; user-select:none;}
-  .section-header h2 { font-size:20px; font-weight:600; }
-  .section-header .toggle { font-size:12px; color:var(--text-light); transition:transform 0.2s;}
-  .section-header .toggle.collapsed { transform:rotate(-90deg); }
-  
-  .tag { display:inline-block; padding:2px 8px; border-radius:4px; font-size:12px; font-weight:500; white-space:nowrap; }
-  .tag-red { background:var(--tag-red-bg); color:var(--red); }
-  .tag-orange { background:var(--tag-orange-bg); color:var(--orange); }
-  .tag-green { background:var(--tag-green-bg); color:var(--green); }
-  .tag-yellow { background:var(--tag-yellow-bg); color:var(--yellow); }
-  .tag-purple { background:var(--tag-purple-bg); color:var(--purple); }
-  .tag-blue { background:var(--tag-blue-bg); color:var(--blue); }
-  .tag-pink { background:var(--tag-pink-bg); color:var(--pink); }
-  .tag-gray { background:var(--tag-gray-bg); color:var(--text-light); }
-  
-  table { width:100%; border-collapse:collapse; font-size:14px; }
-  th { text-align:left; padding:8px 12px; border-bottom:2px solid var(--border); font-weight:600; font-size:12px; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-light); background:var(--sidebar-bg);}
-  td { padding:8px 12px; border-bottom:1px solid var(--border); vertical-align:top; }
-  tr:hover td { background:var(--hover); }
-  
-  .task-list { list-style:none; }
-  .task-list li { display:flex; align-items:flex-start; gap:10px; padding:8px 4px; border-bottom:1px solid var(--border); font-size:14px;}
-  .task-list li:last-child { border-bottom:none; }
-  .checkbox { width:18px; height:18px; border:2px solid #c4c4c4; border-radius:4px; flex-shrink:0; margin-top:2px; cursor:pointer; display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--green);transition:all 0.15s;}
-  .checkbox.checked { background:var(--green); border-color:var(--green); color:#fff;}
-  .task-text.done { text-decoration: line-through; color: var(--text-light); }
-  .task-meta { display:flex; gap:6px; margin-top:4px; flex-wrap:wrap; }
-  
-  .timeline { position:relative; padding-left:24px; }
-  .timeline::before { content:''; position:absolute; left:8px; top:8px; bottom:8px; width:2px; background:var(--border); }
-  .timeline-item { position:relative; margin-bottom:16px; }
-  .timeline-item::before { content:''; position:absolute; left:-20px; top:6px; width:12px; height:12px; border-radius:50%; border:2px solid var(--accent); background:#fff; }
-  .timeline-item.done::before { background:var(--green); border-color:var(--green); }
-  .timeline-item.current::before { background:var(--orange); border-color:var(--orange); animation:pulse 2s infinite; }
-  @keyframes pulse { 0%,100%{box-shadow:0 0 0 0 rgba(217,115,13,0.4)} 50%{box-shadow:0 0 0 6px rgba(217,115,13,0)} }
-  .timeline-date { font-size:12px; color:var(--text-light); font-weight:500; }
-  .timeline-content { font-size:14px; }
-  
-  .callout { background:#fef3dd; border-radius:8px; padding:16px; margin-bottom:16px; display:flex; gap:12px; align-items:flex-start; }
-  .callout-icon { font-size:20px; flex-shrink:0; }
-  .callout-text { font-size:14px; }
-  .callout-red { background:#fbe4e4; }
-  
-  .tabs { display:flex; gap:0; border-bottom:1px solid var(--border); margin-bottom:16px; overflow-x:auto; }
-  .tab { padding:8px 16px; font-size:14px; font-weight:500; cursor:pointer; border-bottom:2px solid transparent; color:var(--text-light); white-space:nowrap; transition:all 0.15s;}
-  .tab.active { color:var(--text); border-bottom-color:var(--text); }
-  .tab:hover { background:var(--hover); }
-  .tab-content { display:none; }
-  .tab-content.active { display:block; }
-  
-  @media(max-width:600px){
-    .page { padding:12px 12px 40px; }
-    .page-title { font-size:24px; }
-    .overview-grid { grid-template-columns:1fr 1fr; }
-    table { font-size:12px; }
-    th,td { padding:6px 8px; }
-    .tab { padding:6px 10px; font-size:13px;}
-  }
-  
-  .progress-bar { height:8px; background:var(--border); border-radius:4px; overflow:hidden; margin-top:4px; }
-  .progress-fill { height:100%; border-radius:4px; transition:width 0.5s; }
-  
-  .vendor-card { border:1px solid var(--border); border-radius:8px; padding:14px; margin-bottom:10px; }
-  .vendor-card .vendor-name { font-weight:600; font-size:15px; }
-  .vendor-card .vendor-detail { font-size:13px; color:var(--text-light); margin-top:4px; }
-  
-  .scroll-table { overflow-x:auto; }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Daily Energy & Stress Tracker</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { font-family: system-ui; }
+    .history { max-height: 400px; overflow-y: auto; }
+  </style>
 </head>
-<body>
-<div class="page">
+<body class="bg-zinc-950 text-white p-6 max-w-2xl mx-auto">
+  <h1 class="text-3xl font-bold text-center mb-8">Daily Tracker</h1>
+  
+  <div class="bg-zinc-900 rounded-2xl p-8">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
 
-  <!-- HEADER -->
-  <div class="page-header">
-    <div class="page-icon">💒</div>
-    <div class="page-title">Henry & Nesley — Bali Wedding</div>
-    <div class="page-subtitle">📅 October 3, 2026 &nbsp;·&nbsp; 📍 Jeeva Saba Villa, Sanur, Bali &nbsp;·&nbsp; 👥 ~25 guests &nbsp;·&nbsp; 🎨 Satin & Sand palette</div>
+      <!-- Energy -->
+      <div>
+        <label class="block text-sm mb-2 font-medium">Energy Level (1-10)</label>
+        <select id="energy" class="w-full bg-zinc-800 text-white rounded-xl p-4 text-2xl focus:outline-none focus:ring-2 focus:ring-emerald-500">
+          <option value="1">1 - 非常疲累</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+          <option value="4">4</option>
+          <option value="5" selected>5 - 中等</option>
+          <option value="6">6</option>
+          <option value="7">7</option>
+          <option value="8">8</option>
+          <option value="9">9</option>
+          <option value="10">10 - 精力爆棚</option>
+        </select>
+      </div>
+
+      <!-- Stress -->
+      <div>
+        <label class="block text-sm mb-2 font-medium">Stress Level (1-10)</label>
+        <select id="stress" class="w-full bg-zinc-800 text-white rounded-xl p-4 text-2xl focus:outline-none focus:ring-2 focus:ring-amber-500">
+          <option value="1">1 - 非常放鬆</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+          <option value="4">4</option>
+          <option value="5" selected>5 - 中等</option>
+          <option value="6">6</option>
+          <option value="7">7</option>
+          <option value="8">8</option>
+          <option value="9">9</option>
+          <option value="10">10 - 壓力爆表</option>
+        </select>
+      </div>
+
+      <!-- Sleep -->
+      <div>
+        <label class="block text-sm mb-2 font-medium">Sleep Quality (1-10)</label>
+        <select id="sleep" class="w-full bg-zinc-800 text-white rounded-xl p-4 text-2xl focus:outline-none focus:ring-2 focus:ring-sky-500">
+          <option value="1">1 - 極差</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+          <option value="4">4</option>
+          <option value="5" selected>5 - 中等</option>
+          <option value="6">6</option>
+          <option value="7">7</option>
+          <option value="8">8</option>
+          <option value="9">9</option>
+          <option value="10">10 - 完美</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="mt-8">
+      <label class="block text-sm mb-2 font-medium">Notes / NoFap / Thoughts</label>
+      <textarea id="notes" rows="3" class="w-full bg-zinc-800 rounded-xl p-4 text-white" placeholder="今日NoFap情況、身體感覺、overthinking..."></textarea>
+    </div>
+
+    <button onclick="saveEntry()" 
+            class="mt-8 w-full bg-white text-black font-semibold py-4 rounded-2xl text-xl hover:bg-emerald-400 transition">
+      ✅ Save Today's Entry
+    </button>
   </div>
 
-  <!-- OVERVIEW CARDS -->
-  <div class="overview-grid">
-    <div class="overview-card">
-      <div class="label">Days to Wedding</div>
-      <div class="value" id="countdown"></div>
+  <div class="mt-10">
+    <div class="flex justify-between items-center mb-4">
+      <h2 class="text-xl font-semibold">History</h2>
+      <button onclick="exportCSV()" 
+              class="text-emerald-400 hover:text-emerald-300 text-sm flex items-center gap-1">
+        📤 Export CSV (Google Sheets / Notion)
+      </button>
     </div>
-    <div class="overview-card">
-      <div class="label">Next Trip to Bali</div>
-      <div class="value" style="font-size:15px;">May 13–16, 2026</div>
-    </div>
-    <div class="overview-card">
-      <div class="label">Vendors Confirmed</div>
-      <div class="value">7 / 10</div>
-    </div>
-    <div class="overview-card">
-      <div class="label">Pending Actions</div>
-      <div class="value" style="color:var(--red);">12 items</div>
-    </div>
+    
+    <table class="w-full text-sm">
+      <thead class="bg-zinc-900">
+        <tr>
+          <th class="text-left p-3">Date</th>
+          <th class="p-3">Energy</th>
+          <th class="p-3">Stress</th>
+          <th class="p-3">Sleep</th>
+          <th class="text-left p-3">Notes</th>
+        </tr>
+      </thead>
+      <tbody id="history" class="history"></tbody>
+    </table>
   </div>
 
-  <!-- URGENT CALLOUT -->
-  <div class="callout callout-red">
-    <div class="callout-icon">🚨</div>
-    <div class="callout-text">
-      <strong>Respond Today:</strong> Dhony asked you to pick <strong>3–4 canapé items</strong> for the May 15 tasting. Also share your <strong>Bali hotel details</strong> ASAP so he can finalize the trip itinerary.
-    </div>
-  </div>
+  <script>
+    let entries = JSON.parse(localStorage.getItem('dailyTracker')) || [];
 
-  <!-- TABS -->
-  <div class="tabs">
-    <div class="tab active" onclick="switchTab(event,'tasks')">📋 Pending Tasks</div>
-    <div class="tab" onclick="switchTab(event,'vendors')">🤝 Vendors</div>
-    <div class="tab" onclick="switchTab(event,'payments')">💰 Payments</div>
-    <div class="tab" onclick="switchTab(event,'timeline')">📅 Timeline</div>
-    <div class="tab" onclick="switchTab(event,'accommodation')">🏠 Accommodation</div>
-    <div class="tab" onclick="switchTab(event,'menu')">🍽️ Menu & Catering</div>
-    <div class="tab" onclick="switchTab(event,'ceremony')">💍 Ceremony & Entertainment</div>
-    <div class="tab" onclick="switchTab(event,'trip')">✈️ May Trip</div>
-    <div class="tab" onclick="switchTab(event,'decisions')">📝 Key Decisions Log</div>
-  </div>
-
-  <!-- TAB: PENDING TASKS -->
-  <div class="tab-content active" id="tasks">
-    <div class="section">
-      <div class="callout" style="background:#fff8e1;">
-        <div class="callout-icon">💡</div>
-        <div class="callout-text">Click checkboxes to track your progress. Tasks are sorted by urgency.</div>
-      </div>
-
-      <h3 style="margin:12px 0 8px;color:var(--red);">🔴 Urgent — Respond to Dhony/Liz</h3>
-      <ul class="task-list">
-        <li><div class="checkbox" onclick="toggleCheck(this)"></div><div><span class="task-text">Select 3–4 canapé items from the menu Dhony sent (Apr 17)</span><div class="task-meta"><span class="tag tag-red">Overdue</span><span class="tag tag-orange">Catering</span></div></div></li>
-        <li><div class="checkbox" onclick="toggleCheck(this)"></div><div><span class="task-text">Share hotel booking details for May 13–15 Bali trip</span><div class="task-meta"><span class="tag tag-red">Blocking</span><span class="tag tag-blue">Trip</span></div></div></li>
-        <li><div class="checkbox" onclick="toggleCheck(this)"></div><div><span class="task-text">Confirm if decor mock-up during visit works (Dhony checking with Belle Eloise)</span><div class="task-meta"><span class="tag tag-orange">Waiting</span><span class="tag tag-purple">Decor</span></div></div></li>
-      </ul>
-
-      <h3 style="margin:16px 0 8px;color:var(--orange);">🟠 High Priority — This Month</h3>
-      <ul class="task-list">
-        <li><div class="checkbox" onclick="toggleCheck(this)"></div><div><span class="task-text">Upload pre-wedding photos to WithJoy website</span><div class="task-meta"><span class="tag tag-orange">Blocks invitations</span><span class="tag tag-blue">Website</span></div></div></li>
-        <li><div class="checkbox" onclick="toggleCheck(this)"></div><div><span class="task-text">Review & pay Moira music invoice (received Apr 9)</span><div class="task-meta"><span class="tag tag-orange">Payment due</span><span class="tag tag-pink">Music</span></div></div></li>
-        <li><div class="checkbox" onclick="toggleCheck(this)"></div><div><span class="task-text">Review & pay RTM fire dance invoice (received Apr 7)</span><div class="task-meta"><span class="tag tag-orange">Payment due</span><span class="tag tag-pink">Entertainment</span></div></div></li>
-        <li><div class="checkbox" onclick="toggleCheck(this)"></div><div><span class="task-text">Select fireworks package from pricelist (sent Mar 8)</span><div class="task-meta"><span class="tag tag-orange">Pending decision</span><span class="tag tag-pink">Entertainment</span></div></div></li>
-        <li><div class="checkbox" onclick="toggleCheck(this)"></div><div><span class="task-text">Provide twin bed name list to Dhony (promised Jan 13)</span><div class="task-meta"><span class="tag tag-red">Overdue</span><span class="tag tag-blue">Accommodation</span></div></div></li>
-        <li><div class="checkbox" onclick="toggleCheck(this)"></div><div><span class="task-text">Finalize rooming list for both Jeeva Saba & Saba Biara 5BR</span><div class="task-meta"><span class="tag tag-orange">Pending</span><span class="tag tag-blue">Accommodation</span></div></div></li>
-        <li><div class="checkbox" onclick="toggleCheck(this)"></div><div><span class="task-text">Review comprehensive budget breakdown (Google Sheet shared Mar 13)</span><div class="task-meta"><span class="tag tag-orange">Pending</span><span class="tag tag-yellow">Budget</span></div></div></li>
-      </ul>
-
-      <h3 style="margin:16px 0 8px;color:var(--yellow);">🟡 Medium Priority — Before May Trip</h3>
-      <ul class="task-list">
-        <li><div class="checkbox" onclick="toggleCheck(this)"></div><div><span class="task-text">Confirm officiant — will your MC double as celebrant? Confirm who the MC is.</span><div class="task-meta"><span class="tag tag-yellow">Decision needed</span><span class="tag tag-purple">Ceremony</span></div></div></li>
-        <li><div class="checkbox" onclick="toggleCheck(this)"></div><div><span class="task-text">Decide on dress code for guests (needed for website update)</span><div class="task-meta"><span class="tag tag-yellow">Decision needed</span><span class="tag tag-blue">Website</span></div></div></li>
-        <li><div class="checkbox" onclick="toggleCheck(this)"></div><div><span class="task-text">Decide if you're having a first dance (needed for rundown & website)</span><div class="task-meta"><span class="tag tag-yellow">Decision needed</span><span class="tag tag-purple">Ceremony</span></div></div></li>
-        <li><div class="checkbox" onclick="toggleCheck(this)"></div><div><span class="task-text">Confirm Belle Eloise decor details: mirror style, dance floor color, keepsake color, phone booth, table arrangement</span><div class="task-meta"><span class="tag tag-yellow">In progress</span><span class="tag tag-purple">Decor</span></div></div></li>
-        <li><div class="checkbox" onclick="toggleCheck(this)"></div><div><span class="task-text">Coordinate Phone a Friend photo booth setup with decorator (video add-on)</span><div class="task-meta"><span class="tag tag-yellow">Pending</span><span class="tag tag-purple">Decor</span></div></div></li>
-        <li><div class="checkbox" onclick="toggleCheck(this)"></div><div><span class="task-text">Collect guest personal information (passport details for rooming list, visa checks)</span><div class="task-meta"><span class="tag tag-yellow">Pending</span><span class="tag tag-blue">Guests</span></div></div></li>
-        <li><div class="checkbox" onclick="toggleCheck(this)"></div><div><span class="task-text">Check all guests have arrival cards & visas (China-born guests need visa)</span><div class="task-meta"><span class="tag tag-yellow">Pending</span><span class="tag tag-blue">Guests</span></div></div></li>
-      </ul>
-
-      <h3 style="margin:16px 0 8px;color:var(--green);">🟢 Lower Priority — Before Wedding</h3>
-      <ul class="task-list">
-        <li><div class="checkbox" onclick="toggleCheck(this)"></div><div><span class="task-text">Publish WithJoy website (after PW photos uploaded)</span><div class="task-meta"><span class="tag tag-green">After photos</span><span class="tag tag-blue">Website</span></div></div></li>
-        <li><div class="checkbox" onclick="toggleCheck(this)"></div><div><span class="task-text">Send digital invitations to all guests via WithJoy</span><div class="task-meta"><span class="tag tag-green">After publish</span><span class="tag tag-blue">Invitations</span></div></div></li>
-        <li><div class="checkbox" onclick="toggleCheck(this)"></div><div><span class="task-text">Design & order hard copy invitations (Taobao — Liz's suggestion)</span><div class="task-meta"><span class="tag tag-green">Anytime</span><span class="tag tag-blue">Invitations</span></div></div></li>
-        <li><div class="checkbox" onclick="toggleCheck(this)"></div><div><span class="task-text">Rent wedding gown in HK & arrange transport to Bali</span><div class="task-meta"><span class="tag tag-green">Before Oct</span><span class="tag tag-pink">Attire</span></div></div></li>
-        <li><div class="checkbox" onclick="toggleCheck(this)"></div><div><span class="task-text">Prepare Spotify playlists (guest arrival, after party)</span><div class="task-meta"><span class="tag tag-green">Before Oct</span><span class="tag tag-pink">Music</span></div></div></li>
-        <li><div class="checkbox" onclick="toggleCheck(this)"></div><div><span class="task-text">Purchase disposable cameras for guests (Etsy or local)</span><div class="task-meta"><span class="tag tag-green">Before Oct</span><span class="tag tag-gray">Misc</span></div></div></li>
-        <li><div class="checkbox" onclick="toggleCheck(this)"></div><div><span class="task-text">Finalize website additions: checklist for guests, brief itinerary, "Things to do in Bali" with local recommendations</span><div class="task-meta"><span class="tag tag-green">Before publish</span><span class="tag tag-blue">Website</span></div></div></li>
-        <li><div class="checkbox" onclick="toggleCheck(this)"></div><div><span class="task-text">Arrange welcome dinner at villa for bridal party & in-house guests (Oct 2 evening)</span><div class="task-meta"><span class="tag tag-green">Before Oct</span><span class="tag tag-orange">Catering</span></div></div></li>
-      </ul>
-    </div>
-  </div>
-
-  <!-- TAB: VENDORS -->
-  <div class="tab-content" id="vendors">
-    <div class="section">
-      <h3 style="margin-bottom:12px;">✅ Confirmed Vendors</h3>
-      <div class="vendor-card">
-        <div style="display:flex;justify-content:space-between;flex-wrap:wrap;"><span class="vendor-name">🎪 Avavi Bali — Wedding Planner</span><span class="tag tag-green">Confirmed</span></div>
-        <div class="vendor-detail">Dhony (planner) + Elisabeth/Liz (owner) + Ivonnela (finance). Group created Jul 3, 2025.</div>
-      </div>
-      <div class="vendor-card">
-        <div style="display:flex;justify-content:space-between;flex-wrap:wrap;"><span class="vendor-name">🏖️ Jeeva Saba — Wedding Venue + Bride Accommodation</span><span class="tag tag-green">Confirmed</span></div>
-        <div class="vendor-detail">8 rooms. Beach House Room 222 reserved for Henry & Nesley (best sunset view). Extra beds IDR 500,000++/person/night, max 6 total.</div>
-      </div>
-      <div class="vendor-card">
-        <div style="display:flex;justify-content:space-between;flex-wrap:wrap;"><span class="vendor-name">🏡 Kutus Kutus Saba Biara — 5BR Beachfront Villa</span><span class="tag tag-green">Booked</span></div>
-        <div class="vendor-detail">Changed from 4BR Saba Garden. Private, beachfront. ~17 min walk / 5 min drive from Jeeva. Invoice received Jan 20. For groomsmen + plus ones + new male guest.</div>
-      </div>
-      <div class="vendor-card">
-        <div style="display:flex;justify-content:space-between;flex-wrap:wrap;"><span class="vendor-name">🍽️ Lumbung Catering — Food & Beverage</span><span class="tag tag-green">Deposit Paid</span></div>
-        <div class="vendor-detail">3-course set menu + canapé cocktail + food stall for after party. Tasting May 15 at 1pm. Deposit IDR 10M paid.</div>
-      </div>
-      <div class="vendor-card">
-        <div style="display:flex;justify-content:space-between;flex-wrap:wrap;"><span class="vendor-name">📸 Pyara — Photo + Video Bundle</span><span class="tag tag-green">Deposit Paid</span></div>
-        <div class="vendor-detail">Bundle: Gejoo (photo) × Bulgary (video). 12 hours (11am–11pm). 50% deposit paid Jan 1, 2026.</div>
-      </div>
-      <div class="vendor-card">
-        <div style="display:flex;justify-content:space-between;flex-wrap:wrap;"><span class="vendor-name">💐 Belle Eloise — Decorator</span><span class="tag tag-yellow">Confirmed, details WIP</span></div>
-        <div class="vendor-detail">Chosen over Flower Lace (more economical). Revised quote received Jan 13. Moodboard and specific items still being finalized.</div>
-      </div>
-      <div class="vendor-card">
-        <div style="display:flex;justify-content:space-between;flex-wrap:wrap;"><span class="vendor-name">🎵 Moira Ensembles — Live Music</span><span class="tag tag-orange">Invoice received, unpaid</span></div>
-        <div class="vendor-detail">Ceremony: Harp & Cello duo. Cocktail + Dinner: Trio (guitar, keyboard, vocalist). Invoice sent Apr 9.</div>
-      </div>
-      <div class="vendor-card">
-        <div style="display:flex;justify-content:space-between;flex-wrap:wrap;"><span class="vendor-name">🔥 RTM (Relations Talent Management) — Fire Dance</span><span class="tag tag-orange">Invoice received, unpaid</span></div>
-        <div class="vendor-detail">4 dancers, performing before dinner transition. Invoice sent Apr 7.</div>
-      </div>
-
-      <h3 style="margin:20px 0 12px;">⏳ Pending / Not Yet Booked</h3>
-      <div class="vendor-card" style="border-color:var(--orange);">
-        <div style="display:flex;justify-content:space-between;flex-wrap:wrap;"><span class="vendor-name">🎆 Fireworks Vendor</span><span class="tag tag-red">Not selected</span></div>
-        <div class="vendor-detail">Pricelist shared Mar 8. You said yes to fireworks but haven't picked a package.</div>
-      </div>
-      <div class="vendor-card" style="border-color:var(--orange);">
-        <div style="display:flex;justify-content:space-between;flex-wrap:wrap;"><span class="vendor-name">💒 Officiant / Celebrant</span><span class="tag tag-red">Not confirmed</span></div>
-        <div class="vendor-detail">No Cantonese-speaking celebrant in Bali (would need to hire from Malaysia). Discussed having MC double as celebrant — not confirmed. Celebrant recommendations in Google Drive folder.</div>
-      </div>
-      <div class="vendor-card" style="border-color:var(--orange);">
-        <div style="display:flex;justify-content:space-between;flex-wrap:wrap;"><span class="vendor-name">📱 Phone a Friend — Photo Booth</span><span class="tag tag-yellow">Discussed, not booked</span></div>
-        <div class="vendor-detail">Henry wants video setup add-on. Need to coordinate with decorator for entrance placement. IG: @phoneafriend.co</div>
-      </div>
-      <div class="vendor-card" style="border-color:var(--text-light);border-style:dashed;">
-        <div style="display:flex;justify-content:space-between;flex-wrap:wrap;"><span class="vendor-name">💄 MUA — Makeup Artist</span><span class="tag tag-gray">Not needed</span></div>
-        <div class="vendor-detail">Nesley confirmed no MUA needed (Nov 19). However, later mentioned MUA & assistant staying at Jeeva Saba — clarify if this changed.</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- TAB: PAYMENTS -->
-  <div class="tab-content" id="payments">
-    <div class="section">
-      <div class="callout">
-        <div class="callout-icon">💰</div>
-        <div class="callout-text">Payment record maintained by Dhony: <a href="https://docs.google.com/spreadsheets/d/1_VTKkkhQOfcjOr2EBz7a9m929K-XnCts/edit?gid=567412398#gid=567412398" target="_blank" style="color:var(--accent);">Google Sheet</a><br>Budget breakdown: <a href="https://docs.google.com/spreadsheets/d/1qkaJeMJRcu9jbNaMrm8ebJx3SFJ3z7af/edit?gid=1923715271#gid=1923715271" target="_blank" style="color:var(--accent);">Google Sheet</a></div>
-      </div>
-      <div class="scroll-table">
-      <table>
-        <thead><tr><th>Date</th><th>Item</th><th>Amount (IDR)</th><th>Paid To</th><th>Status</th></tr></thead>
-        <tbody>
-          <tr><td>Dec 2, 2025</td><td>Kutus Kutus 4BR — 2 nights deposit (50%)</td><td>10,398,000</td><td>Avavi Bali</td><td><span class="tag tag-green">Paid</span></td></tr>
-          <tr><td>Dec 2, 2025</td><td>Lumbung Catering — date blocking deposit</td><td>10,000,000</td><td>Avavi Bali</td><td><span class="tag tag-green">Paid</span></td></tr>
-          <tr style="font-size:12px;color:var(--text-light);"><td colspan="2" style="text-align:right;"><em>Paid in 2 transfers:</em></td><td colspan="3"><em>IDR 10,948,000 + IDR 9,450,000 = IDR 20,398,000 total</em></td></tr>
-          <tr><td>Jan 1, 2026</td><td>Pyara (Gejoo × Bulgary bundle) — 50% deposit</td><td>TBC from invoice</td><td>Pyara direct</td><td><span class="tag tag-green">Paid</span></td></tr>
-          <tr><td>Jan 20, 2026</td><td>Kutus Kutus Saba Biara 5BR — invoice received</td><td>See invoice</td><td>Via Avavi</td><td><span class="tag tag-orange">Unclear</span></td></tr>
-          <tr><td>Apr 7, 2026</td><td>RTM Fire Dance — 4 dancers</td><td>See invoice</td><td>TBC</td><td><span class="tag tag-red">Unpaid</span></td></tr>
-          <tr><td>Apr 9, 2026</td><td>Moira Music — Ceremony + Cocktail/Dinner</td><td>See invoice</td><td>TBC</td><td><span class="tag tag-red">Unpaid</span></td></tr>
-          <tr><td>—</td><td>Belle Eloise — Decorator deposit</td><td>TBC</td><td>TBC</td><td><span class="tag tag-gray">Not yet invoiced</span></td></tr>
-          <tr><td>—</td><td>Fireworks — TBD package</td><td>TBC</td><td>TBC</td><td><span class="tag tag-gray">Not selected</span></td></tr>
-        </tbody>
-      </table>
-      </div>
-      <div class="callout" style="margin-top:16px;">
-        <div class="callout-icon">⚠️</div>
-        <div class="callout-text"><strong>Note:</strong> The 4BR Kutus deposit was paid, but you switched to 5BR. Unclear if the deposit transferred or if additional payment is needed. Clarify with Dhony during the May trip.</div>
-      </div>
-      <p style="margin-top:12px;font-size:13px;color:var(--text-light);">Avavi Bali bank details: BNI, Acc# 1937584722, PT AVAVI BALI GROUP, SWIFT: BNINIDJA</p>
-    </div>
-  </div>
-
-  <!-- TAB: TIMELINE -->
-  <div class="tab-content" id="timeline">
-    <div class="section">
-      <h3 style="margin-bottom:16px;">Key Milestones</h3>
-      <div class="timeline">
-        <div class="timeline-item done"><div class="timeline-date">Jul 3, 2025</div><div class="timeline-content">Planning group created with Avavi Bali</div></div>
-        <div class="timeline-item done"><div class="timeline-date">Jul 9, 2025</div><div class="timeline-content">First Zoom meeting with Avavi</div></div>
-        <div class="timeline-item done"><div class="timeline-date">Jul 30, 2025</div><div class="timeline-content">Chose WithJoy for wedding website</div></div>
-        <div class="timeline-item done"><div class="timeline-date">Sep 2025</div><div class="timeline-content">Chose Satin & Sand color palette, decoration style confirmed</div></div>
-        <div class="timeline-item done"><div class="timeline-date">Oct 6, 2025</div><div class="timeline-content">Kutus Kutus 4BR tentatively booked</div></div>
-        <div class="timeline-item done"><div class="timeline-date">Nov 2025</div><div class="timeline-content">Pre-wedding photoshoot in Perth 📸</div></div>
-        <div class="timeline-item done"><div class="timeline-date">Nov 19, 2025</div><div class="timeline-content">Lumbung Catering confirmed, MUA declined</div></div>
-        <div class="timeline-item done"><div class="timeline-date">Nov 28, 2025</div><div class="timeline-content">Zoom call — discussed Axioo vs Pyara, Phone a Friend</div></div>
-        <div class="timeline-item done"><div class="timeline-date">Dec 2, 2025</div><div class="timeline-content">Paid deposits: Kutus + Lumbung (IDR 20.4M via Avavi)</div></div>
-        <div class="timeline-item done"><div class="timeline-date">Dec 17, 2025</div><div class="timeline-content">Booked Pyara Bundle Gejoo × Bulgary, 12 hours</div></div>
-        <div class="timeline-item done"><div class="timeline-date">Jan 1, 2026</div><div class="timeline-content">Paid Pyara 50% deposit directly</div></div>
-        <div class="timeline-item done"><div class="timeline-date">Jan 13, 2026</div><div class="timeline-content">Zoom meetings with Flower Lace & Belle Eloise decorators</div></div>
-        <div class="timeline-item done"><div class="timeline-date">Jan 13, 2026</div><div class="timeline-content">Changed Kutus to 5BR Saba Biara beachfront villa</div></div>
-        <div class="timeline-item done"><div class="timeline-date">Feb 4, 2026</div><div class="timeline-content">Chose Belle Eloise as decorator</div></div>
-        <div class="timeline-item done"><div class="timeline-date">Mar 8, 2026</div><div class="timeline-content">Detailed decor feedback sent, fireworks & entertainment discussed</div></div>
-        <div class="timeline-item done"><div class="timeline-date">Apr 7, 2026</div><div class="timeline-content">Music confirmed: Moira — Harp+Cello (ceremony), Trio (cocktail+dinner)</div></div>
-        <div class="timeline-item done"><div class="timeline-date">Apr 6, 2026</div><div class="timeline-content">Fire dance booked: RTM, 4 dancers</div></div>
-        <div class="timeline-item current"><div class="timeline-date">Apr 17, 2026</div><div class="timeline-content"><strong>TODAY — Pick canapé items, share hotel details</strong></div></div>
-        <div class="timeline-item"><div class="timeline-date">Apr–May 2026</div><div class="timeline-content">Upload PW photos → Publish website → Send invitations</div></div>
-        <div class="timeline-item"><div class="timeline-date">May 13, 2026</div><div class="timeline-content">Arrive Bali (flight lands ~5:45pm)</div></div>
-        <div class="timeline-item"><div class="timeline-date">May 14, 2026</div><div class="timeline-content">Visit Saba Biara 5BR (10am) → Jeeva Saba (11am) → Discussion + lunch (12pm) → Decor mock-up (TBC)</div></div>
-        <div class="timeline-item"><div class="timeline-date">May 15, 2026</div><div class="timeline-content">Food tasting at Lumbung (1pm) — soups, mains, desserts, canapés</div></div>
-        <div class="timeline-item"><div class="timeline-date">May 16, 2026</div><div class="timeline-content">Depart Bali</div></div>
-        <div class="timeline-item"><div class="timeline-date">Oct 1–2, 2026</div><div class="timeline-content">Henry & Nesley arrive Bali, settle in (2 days early)</div></div>
-        <div class="timeline-item"><div class="timeline-date">Oct 2, 2026</div><div class="timeline-content">Guests arrive, check in. Casual welcome dinner at villa for bridal party.</div></div>
-        <div class="timeline-item"><div class="timeline-date" style="font-weight:700;color:var(--pink);">Oct 3, 2026</div><div class="timeline-content" style="font-weight:700;">🎉 WEDDING DAY</div></div>
-        <div class="timeline-item"><div class="timeline-date">Oct 4, 2026</div><div class="timeline-content">Guests check out & depart</div></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- TAB: ACCOMMODATION -->
-  <div class="tab-content" id="accommodation">
-    <div class="section">
-      <h3 style="margin-bottom:12px;">🏠 Accommodation Plan (Oct 2–4, 2026)</h3>
-      <p style="font-size:14px;margin-bottom:16px;color:var(--text-light);">All guest accommodation is covered by Henry & Nesley. Website: <a href="https://withjoy.com/henryandnesley/page/accommodation" target="_blank" style="color:var(--accent);">WithJoy Accommodation Page</a></p>
-      
-      <div class="vendor-card">
-        <div class="vendor-name">🏖️ Jeeva Saba Villa</div>
-        <div class="vendor-detail">
-          <strong>8 rooms</strong> — 2 Beach Houses (upstairs master suites are the best), other suites.<br>
-          <strong>Room 222:</strong> Reserved for Henry & Nesley (best sunset view, swapped with Lau family).<br>
-          <strong>Bed config:</strong> 2 rooms with twin beds (2 singles), 2 rooms with queen bed.<br>
-          <strong>Extra beds:</strong> Max 6 total (1/room), IDR 500,000++/person/night, folding or mattress type (proper quality confirmed).<br>
-          <strong>Assigned to:</strong> Bride & groom, family members, bridesmaids, MUA & assistant (if applicable).<br>
-          <strong>Twin bed request:</strong> MUA & assistant (others TBD — <span style="color:var(--red);">NAME LIST NOT YET SENT</span>)
-        </div>
-      </div>
-
-      <div class="vendor-card">
-        <div class="vendor-name">🏡 Kutus Kutus Saba Biara — 5BR Beachfront Villa</div>
-        <div class="vendor-detail">
-          <strong>5 bedrooms</strong>, private, beachfront. IDR 7,000,000/night + breakfast for 10 pax.<br>
-          <strong>Distance:</strong> ~17 min walk / 5 min drive from Jeeva Saba.<br>
-          <strong>Assigned to:</strong> Best men + their plus ones + one new male guest.<br>
-          <strong>Changed from:</strong> Originally 4BR Saba Garden (IDR 5,199,000/night). Deposit may need adjustment.
-        </div>
-      </div>
-
-      <div class="callout" style="margin-top:12px;">
-        <div class="callout-icon">📋</div>
-        <div class="callout-text">
-          <strong>Rooming list:</strong> <a href="https://docs.google.com/spreadsheets/d/1LScLqAeZQ-gVGVoLpS-2NunkrnKX5XNk/edit?gid=19541812#gid=19541812" target="_blank" style="color:var(--accent);">Google Sheet</a><br>
-          Nesley partially filled rows 21–28 based on Jeeva website descriptions. Need to finalize after confirming room numbers with villa.
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- TAB: MENU -->
-  <div class="tab-content" id="menu">
-    <div class="section">
-      <h3 style="margin-bottom:12px;">🍽️ Wedding Day Menu (Oct 3)</h3>
-      <p style="font-size:14px;color:var(--text-light);margin-bottom:12px;">Caterer: <strong>Lumbung Catering</strong> · Format: 3-course set menu (alternate drop) + canapés (cocktail) + food stall (after party)</p>
-      
-      <div class="scroll-table">
-      <table>
-        <thead><tr><th>Course</th><th>Option 1</th><th>Option 2</th><th>Status</th></tr></thead>
-        <tbody>
-          <tr><td><strong>Canapé (Cocktail)</strong></td><td colspan="2">Choose 3–4 from menu sent Apr 17 🔴</td><td><span class="tag tag-red">PICK NOW</span></td></tr>
-          <tr><td><strong>Soup</strong></td><td>Cream of Pumpkin</td><td>Prawn Bisque</td><td><span class="tag tag-green">Confirmed</span></td></tr>
-          <tr><td><strong>Main</strong></td><td>Beef Tenderloin Steak</td><td>Grilled Snapper Fillet Jimbaran</td><td><span class="tag tag-green">Confirmed</span></td></tr>
-          <tr><td><strong>Dessert</strong></td><td>Coconut Pandan Panna Cotta</td><td>Chocolate Crème Brûlée</td><td><span class="tag tag-green">Confirmed</span></td></tr>
-          <tr><td><strong>Wedding Cake</strong></td><td colspan="2">Saved for after party (not served as course dessert)</td><td><span class="tag tag-yellow">Vendor TBD</span></td></tr>
-          <tr><td><strong>After Party Stall</strong></td><td colspan="2">1 food stall / live station from ~8:30pm</td><td><span class="tag tag-yellow">Details TBD</span></td></tr>
-        </tbody>
-      </table>
-      </div>
-
-      <div class="callout" style="margin-top:16px;">
-        <div class="callout-icon">🧑‍🍳</div>
-        <div class="callout-text"><strong>Food Tasting:</strong> May 15, 2026 at 1pm at Lumbung. Free of charge (post-confirmation). Includes all menu items above + canapés. Notes on taste/presentation can be given; menu changes possible but would require re-tasting and re-asking guests.</div>
-      </div>
-
-      <h3 style="margin:20px 0 12px;">🍷 Beverages</h3>
-      <p style="font-size:14px;color:var(--text-light);">Beverage package details to be confirmed with Lumbung. Quotation pending after canapé and beverage selections are finalized.</p>
-
-      <h3 style="margin:20px 0 12px;">🌙 Welcome Dinner (Oct 2 Evening)</h3>
-      <p style="font-size:14px;color:var(--text-light);">Casual dinner at Jeeva Saba for bridal party & in-house guests. Other guests free to explore. Details TBD.</p>
-    </div>
-  </div>
-
-  <!-- TAB: CEREMONY & ENTERTAINMENT -->
-  <div class="tab-content" id="ceremony">
-    <div class="section">
-      <h3 style="margin-bottom:12px;">💍 Wedding Day Rundown (Draft)</h3>
-      <p style="font-size:13px;color:var(--text-light);margin-bottom:12px;">Rundown maintained by Dhony — edits ongoing. Tea ceremony added. Groom prep in media room, bride in master bedroom (Room 222).</p>
-      
-      <div class="scroll-table">
-      <table>
-        <thead><tr><th>Time</th><th>Event</th><th>Music / Notes</th></tr></thead>
-        <tbody>
-          <tr><td>Early AM</td><td>Bride & Groom get ready (separate rooms)</td><td>Groom in media room, bride in Room 222</td></tr>
-          <tr><td>AM</td><td>Tea Ceremony</td><td>Groom picks up bride (no gate crash). 5 elders served tea (Henry's parents as couple, + 3 more). Groomsmen ×4, Bridesmaids ×4, family.</td></tr>
-          <tr><td>TBC</td><td>Guest Arrival</td><td>Spotify playlist</td></tr>
-          <tr><td>TBC</td><td>Wedding Ceremony</td><td>Moira: Harp & Cello duo (3–4 songs for entrance, rest while guests settle). Officiant: TBD (MC?)</td></tr>
-          <tr><td>TBC</td><td>Cocktail Hour</td><td>Canapés served. Moira: Trio (guitar, keyboard, vocalist) — 45 min set. Spotify fills breaks.</td></tr>
-          <tr><td>Before dinner</td><td>🔥 Fire Dance</td><td>RTM — 4 dancers</td></tr>
-          <tr><td>TBC</td><td>Dinner (3-course set menu)</td><td>Moira: Trio — 45 min set. Then speeches.</td></tr>
-          <tr><td>TBC</td><td>🎆 Fireworks</td><td>Package TBD</td></tr>
-          <tr><td>~8:30pm+</td><td>After Party</td><td>Spotify playlist. Food stall open. Wedding cake served. Caterer helps cut cake.</td></tr>
-          <tr><td>~11pm</td><td>End</td><td>—</td></tr>
-        </tbody>
-      </table>
-      </div>
-
-      <h3 style="margin:20px 0 12px;">🎶 Entertainment Summary</h3>
-      <div class="scroll-table">
-      <table>
-        <thead><tr><th>Item</th><th>Vendor</th><th>Details</th><th>Status</th></tr></thead>
-        <tbody>
-          <tr><td>Ceremony Music</td><td>Moira</td><td>Harp & Cello duo (harp is standalone, not in Apollo package)</td><td><span class="tag tag-orange">Invoice recd</span></td></tr>
-          <tr><td>Cocktail + Dinner Music</td><td>Moira</td><td>Trio: guitar + keyboard + vocalist (bundling package, up to 90 min perf / 3 hr timeframe)</td><td><span class="tag tag-orange">Invoice recd</span></td></tr>
-          <tr><td>Fire Dance</td><td>RTM</td><td>4 dancers, before dinner</td><td><span class="tag tag-orange">Invoice recd</span></td></tr>
-          <tr><td>Fireworks</td><td>TBD</td><td>Pricelist sent Mar 8 — select package</td><td><span class="tag tag-red">Not selected</span></td></tr>
-          <tr><td>After Party Music</td><td>—</td><td>Spotify playlist (no DJ)</td><td><span class="tag tag-yellow">Playlist TBD</span></td></tr>
-          <tr><td>Photo Booth</td><td>Phone a Friend</td><td>Entrance area, video add-on. Coordinate with decorator.</td><td><span class="tag tag-yellow">Not booked</span></td></tr>
-          <tr><td>MC</td><td>Family relative</td><td>Name not confirmed. May double as celebrant?</td><td><span class="tag tag-yellow">Confirm who</span></td></tr>
-          <tr><td>Officiant</td><td>TBD</td><td>No Cantonese celebrant in Bali. Consider MC or external.</td><td><span class="tag tag-red">Not confirmed</span></td></tr>
-        </tbody>
-      </table>
-      </div>
-
-      <h3 style="margin:20px 0 12px;">💐 Decoration (Belle Eloise)</h3>
-      <p style="font-size:14px;margin-bottom:8px;">Theme: <strong>Satin & Sand</strong> · Rattan and flax/linen elements · Beachside, laid-back</p>
-      <p style="font-size:14px;margin-bottom:8px;">Color palette: White sandy color + neutrals + some greens</p>
-      <p style="font-size:13px;color:var(--text-light);">Pending decor details (raised Mar 8):</p>
-      <ul style="font-size:13px;color:var(--text-light);margin-left:20px;">
-        <li>Entrance mirror style (reference photo sent by Nesley)</li>
-        <li>Dance floor — single maple color (not checkered)?</li>
-        <li>Phone a Friend booth stand at entrance — coordinate with decorator</li>
-        <li>Table arrangement — closer together (reference photo sent)</li>
-        <li>Wedding keepsake — change from green to neutral/theme-matching color</li>
-        <li>Decor mock-up during May visit — Dhony checking with Belle Eloise</li>
-      </ul>
-    </div>
-  </div>
-
-  <!-- TAB: MAY TRIP -->
-  <div class="tab-content" id="trip">
-    <div class="section">
-      <h3 style="margin-bottom:12px;">✈️ Bali Site Visit — May 13–16, 2026</h3>
-      
-      <div class="vendor-card" style="border-left:4px solid var(--accent);">
-        <div class="vendor-name">Day 1 — May 13 (Wed)</div>
-        <div class="vendor-detail">
-          ✈️ Arrive Bali ~5:45pm<br>
-          🏨 Check in to hotel — <span style="color:var(--red);font-weight:600;">⚠️ HOTEL DETAILS NOT YET SHARED WITH DHONY</span><br>
-          🌙 Free evening — explore Sanur recommended
-        </div>
-      </div>
-
-      <div class="vendor-card" style="border-left:4px solid var(--purple);">
-        <div class="vendor-name">Day 2 — May 14 (Thu)</div>
-        <div class="vendor-detail">
-          10:00 AM — Visit Saba Biara 5BR beachfront villa (subject to availability, re-check day before)<br>
-          11:00 AM — Visit Jeeva Saba (weekdays only)<br>
-          12:00 PM — Wedding discussion with Avavi team + lunch nearby<br>
-          TBC — Decor mock-up with Belle Eloise (Dhony checking)
-        </div>
-      </div>
-
-      <div class="vendor-card" style="border-left:4px solid var(--green);">
-        <div class="vendor-name">Day 3 — May 15 (Fri)</div>
-        <div class="vendor-detail">
-          🍽️ 1:00 PM — Food tasting at Lumbung Catering<br>
-          Menu: Cream of Pumpkin / Prawn Bisque → Beef Tenderloin / Grilled Snapper → Coconut Pandan Panna Cotta / Chocolate Crème Brûlée + Canapés (3–4 items TBD)<br>
-          Tasting is complimentary; notes on taste/presentation accepted.
-        </div>
-      </div>
-
-      <div class="vendor-card" style="border-left:4px solid var(--text-light);">
-        <div class="vendor-name">Day 4 — May 16 (Sat)</div>
-        <div class="vendor-detail">
-          Free time, check out & departure
-        </div>
-      </div>
-
-      <div class="callout">
-        <div class="callout-icon">📝</div>
-        <div class="callout-text"><strong>To prepare before the trip:</strong> Share hotel details with Dhony, pick canapé items, prepare all questions about decor/rundown/budget. This is your chance to meet the Avavi team in person for the first time!</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- TAB: KEY DECISIONS LOG -->
-  <div class="tab-content" id="decisions">
-    <div class="section">
-      <h3 style="margin-bottom:12px;">📝 Key Decisions Made</h3>
-      <div class="scroll-table">
-      <table>
-        <thead><tr><th>Date</th><th>Decision</th><th>Details</th></tr></thead>
-        <tbody>
-          <tr><td>Jul 30 '25</td><td>Website platform</td><td>WithJoy (briefly considered Zola, decided against)</td></tr>
-          <tr><td>Sep 22 '25</td><td>Color theme</td><td>Satin & Sand — white sandy + neutrals + greens</td></tr>
-          <tr><td>Sep 22 '25</td><td>Guest count</td><td>~25 guests (mostly family, groomsmen, bridesmaids)</td></tr>
-          <tr><td>Sep 22 '25</td><td>Guest costs covered</td><td>Flight + accommodation for all guests (90% family)</td></tr>
-          <tr><td>Oct 6 '25</td><td>Additional villa</td><td>Kutus Kutus (initially 4BR, changed to 5BR Jan 13 '26)</td></tr>
-          <tr><td>Oct 31 '25</td><td>Catering format</td><td>Set menu for wedding + stall for after party. Welcome dinner casual at villa.</td></tr>
-          <tr><td>Nov 19 '25</td><td>Caterer</td><td>Lumbung Catering — 3-course + stall</td></tr>
-          <tr><td>Nov 19 '25</td><td>MUA</td><td>Not needed</td></tr>
-          <tr><td>Dec 17 '25</td><td>Photo/Video</td><td>Pyara Bundle Gejoo × Bulgary, 12 hours</td></tr>
-          <tr><td>Jan 28 '26</td><td>Wedding gown</td><td>Rent in HK, bring to Bali</td></tr>
-          <tr><td>Feb 4 '26</td><td>Decorator</td><td>Belle Eloise (over Flower Lace — more economical)</td></tr>
-          <tr><td>Mar 8 '26</td><td>MC</td><td>Family relative (name TBD)</td></tr>
-          <tr><td>Mar 8 '26</td><td>Fireworks</td><td>Yes — package not yet selected</td></tr>
-          <tr><td>Mar 15 '26</td><td>Tea ceremony</td><td>Morning of wedding day. 5 elders, 1 couple. Groom picks up bride (no gate crash).</td></tr>
-          <tr><td>Apr 6 '26</td><td>Fire dance</td><td>RTM, 4 dancers, before dinner</td></tr>
-          <tr><td>Apr 7 '26</td><td>Live music</td><td>Moira — Ceremony: Harp+Cello duo. Cocktail+Dinner: Guitar+Keyboard+Vocalist trio. No DJ. Spotify for arrival + after party.</td></tr>
-          <tr><td>Jan 16 '26</td><td>Menu selections</td><td>Soups, mains, desserts confirmed (alternate drop). Wedding cake for after party only.</td></tr>
-        </tbody>
-      </table>
-      </div>
-
-      <h3 style="margin:24px 0 12px;">❓ Open Decisions Still Needed</h3>
-      <div class="scroll-table">
-      <table>
-        <thead><tr><th>Item</th><th>Context</th><th>Urgency</th></tr></thead>
-        <tbody>
-          <tr><td>Canapé selection (3–4 items)</td><td>Menu image sent Apr 17 by Dhony</td><td><span class="tag tag-red">Today</span></td></tr>
-          <tr><td>Officiant / Celebrant</td><td>MC as celebrant? Or hire externally? No Cantonese option in Bali.</td><td><span class="tag tag-orange">Before May trip</span></td></tr>
-          <tr><td>Fireworks package</td><td>Pricelist from Azimuth sent Mar 8</td><td><span class="tag tag-orange">Soon</span></td></tr>
-          <tr><td>Dress code for guests</td><td>Needed for website update</td><td><span class="tag tag-yellow">Before publish</span></td></tr>
-          <tr><td>First dance (yes/no)</td><td>Affects rundown and website</td><td><span class="tag tag-yellow">Before publish</span></td></tr>
-          <tr><td>Phone a Friend booking</td><td>Video add-on, entrance placement</td><td><span class="tag tag-yellow">Before May trip</span></td></tr>
-          <tr><td>Beverage package</td><td>Lumbung waiting for selection before final quotation</td><td><span class="tag tag-yellow">Before May trip</span></td></tr>
-          <tr><td>Wedding cake vendor</td><td>Not discussed yet — just decided cake is for after party</td><td><span class="tag tag-green">Later</span></td></tr>
-          <tr><td>Hard copy invitation design</td><td>Liz suggested Taobao. Template from WithJoy.</td><td><span class="tag tag-green">After website published</span></td></tr>
-          <tr><td>Sound system & lighting details</td><td>Dhony confirmed proper system will be provided — specifics TBD</td><td><span class="tag tag-green">Later</span></td></tr>
-        </tbody>
-      </table>
-      </div>
-    </div>
-  </div>
-
-</div>
-
-<script>
-  // Countdown
-  const wedding = new Date('2026-10-03T00:00:00');
-  const today = new Date();
-  const diff = Math.ceil((wedding - today)/(1000*60*60*24));
-  document.getElementById('countdown').textContent = diff + ' days';
-
-  // Tab switching
-  function switchTab(e, id) {
-    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-    document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
-    e.target.classList.add('active');
-    document.getElementById(id).classList.add('active');
-  }
-
-  // Checkbox toggle
-  function toggleCheck(el) {
-    el.classList.toggle('checked');
-    const txt = el.nextElementSibling.querySelector('.task-text');
-    if(el.classList.contains('checked')){
-      el.innerHTML='✓';
-      txt.classList.add('done');
-    } else {
-      el.innerHTML='';
-      txt.classList.remove('done');
+    function renderHistory() {
+      const tbody = document.getElementById('history');
+      tbody.innerHTML = '';
+      entries.slice().reverse().forEach(entry => {
+        const tr = document.createElement('tr');
+        tr.className = 'border-b border-zinc-800 hover:bg-zinc-800';
+        tr.innerHTML = `
+          <td class="p-3">${entry.date}</td>
+          <td class="p-3 text-center text-emerald-400 font-bold">${entry.energy}</td>
+          <td class="p-3 text-center text-amber-400 font-bold">${entry.stress}</td>
+          <td class="p-3 text-center text-sky-400 font-bold">${entry.sleep}</td>
+          <td class="p-3 text-xs text-zinc-400">${entry.notes || '-'}</td>
+        `;
+        tbody.appendChild(tr);
+      });
     }
-  }
-</script>
+
+    function saveEntry() {
+      const entry = {
+        date: new Date().toLocaleDateString('zh-HK'),
+        energy: document.getElementById('energy').value,
+        stress: document.getElementById('stress').value,
+        sleep: document.getElementById('sleep').value,
+        notes: document.getElementById('notes').value.trim()
+      };
+      entries.unshift(entry);
+      localStorage.setItem('dailyTracker', JSON.stringify(entries));
+      renderHistory();
+      
+      document.getElementById('notes').value = '';
+      alert('✅ 已成功儲存！');
+    }
+
+    function exportCSV() {
+      let csv = "Date,Energy,Stress,Sleep,Quality,Notes\n";
+      entries.forEach(e => {
+        csv += `${e.date},${e.energy},${e.stress},${e.sleep},"${(e.notes || '').replace(/"/g, '""')}"\n`;
+      });
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = `daily-tracker-${new Date().toISOString().slice(0,10)}.csv`;
+      link.click();
+    }
+
+    // 載入歷史
+    renderHistory();
+  </script>
 </body>
 </html>
